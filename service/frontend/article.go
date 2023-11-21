@@ -29,9 +29,9 @@ func (s *FrontendArticle) GetArticleList(info frontendReq.ArticleSearch, c *fibe
 		return list, 0, errors.New("总数请求失败")
 	}
 	if info.IsImportant != 0 {
-		articleStr, err = global.REDIS.Get(c, "article-list-home").Result()
+		articleStr, err = global.REDIS.Get(c.Context(), "article-list-home").Result()
 	} else {
-		articleStr, err = global.REDIS.Get(c, "article-list"+strconv.Itoa(info.Page)).Result()
+		articleStr, err = global.REDIS.Get(c.Context(), "article-list"+strconv.Itoa(info.Page)).Result()
 	}
 
 	if err == redis.Nil {
@@ -54,10 +54,10 @@ func (s *FrontendArticle) GetArticleList(info frontendReq.ArticleSearch, c *fibe
 
 		if info.IsImportant != 0 {
 			// articleStr, err = global.REDIS.Get(c, "article-list-home").Result()
-			err = global.REDIS.Set(c, "article-list-home", strList, time.Duration(cacheTime)*time.Second).Err()
+			err = global.REDIS.Set(c.Context(), "article-list-home", strList, time.Duration(cacheTime)*time.Second).Err()
 		} else {
-			_ = global.REDIS.Set(c, "article-list-total", totalStr, time.Duration(cacheTime)*time.Second).Err()
-			err = global.REDIS.Set(c, "article-list-"+strconv.Itoa(info.Page), strList, time.Duration(cacheTime)*time.Second).Err()
+			_ = global.REDIS.Set(c.Context(), "article-list-total", totalStr, time.Duration(cacheTime)*time.Second).Err()
+			err = global.REDIS.Set(c.Context(), "article-list-"+strconv.Itoa(info.Page), strList, time.Duration(cacheTime)*time.Second).Err()
 		}
 
 		if err != nil {
@@ -77,7 +77,7 @@ func (s *FrontendArticle) GetArticleList(info frontendReq.ArticleSearch, c *fibe
 }
 
 func (s *FrontendArticle) GetAricleDetail(articleId int, c *fiber.Ctx) (articleDetail frontend.Article, err error) {
-	reqIP := c.ClientIP()
+	reqIP := c.IP()
 	var ipUser frontend.Ip
 	t := time.Now()
 	startTime := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())

@@ -7,12 +7,13 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	uuid "github.com/satori/go.uuid"
 )
 
-func GetClaims(c *gin.Context) (*systemReq.CustomClaims, error) {
-	tokenString := c.Request.Header.Get("Authorization")
-	tokenValue := strings.Split(tokenString, " ")
+func GetClaims(c *fiber.Ctx) (*systemReq.CustomClaims, error) {
+	tokenString := c.Request().Header.Peek("Authorization")
+	tokenValue := strings.Split(string(tokenString), " ")
 	if tokenValue[0] != "Bearer" {
 		return nil, errors.New("token 错误")
 	}
@@ -26,17 +27,19 @@ func GetClaims(c *gin.Context) (*systemReq.CustomClaims, error) {
 }
 
 // 从Gin的Context中获取从jwt解析出来的用户ID
-func GetUserID(c *gin.Context) uint {
-	if claims, exists := c.Get("claims"); !exists {
-		if cl, err := GetClaims(c); err != nil {
-			return 0
-		} else {
-			return uint(cl.BaseClaims.ID)
-		}
-	} else {
-		waitUse := claims.(*systemReq.CustomClaims)
-		return waitUse.BaseClaims.ID
-	}
+func GetUserID(c *fiber.Ctx) uint {
+	claims := c.Request().Header.Peek("claims")
+	waitUse := string(claims).(*systemReq.CustomClaims)
+	return waitUse.BaseClaims.ID
+	// !exists {
+	// 	if cl, err := GetClaims(c); err != nil {
+	// 		return 0
+	// 	} else {
+	// 		return uint(cl.BaseClaims.ID)
+	// 	}
+	// } else {
+
+	// }
 }
 
 // 从Gin的Context中获取从jwt解析出来的用户UUID

@@ -29,7 +29,7 @@ func (o *_obs) UploadFile(file *multipart.FileHeader) (filename string, filepath
 				Bucket: global.CONFIG.HuaWeiObs.Bucket,
 				Key:    filename,
 			},
-			ContentType: file.Header.Get("content-type"),
+			// ContentType: file.Header.Get("content-type"),
 		},
 		Body: open,
 	}
